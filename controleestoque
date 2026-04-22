@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estoque</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { text-align: center; }
+        .form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        .vencido { background-color: #ffcccc; }
+        .proximo { background-color: #fff3cd; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Controle de Estoque e Validade</h2>
+    <div class="form-group">
+        <input type="text" id="prodNome" placeholder="Nome do Produto">
+        <input type="number" id="prodQtd" placeholder="Quantidade">
+        <input type="date" id="prodVal" placeholder="Validade">
+        <button onclick="adicionarProduto()">Adicionar Produto</button>
+    </div>
+
+    <table id="tabelaEstoque">
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Qtd</th>
+                <th>Validade</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody id="listaProdutos"></tbody>
+    </table>
+</div>
+
+<script>
+    let produtos = JSON.parse(localStorage.getItem('estoque')) || [];
+
+    function salvar() {
+        localStorage.setItem('estoque', JSON.stringify(produtos));
+        renderizar();
+    }
+
+    function adicionarProduto() {
+        const nome = document.getElementById('prodNome').value;
+        const qtd = document.getElementById('prodQtd').value;
+        const val = document.getElementById('prodVal').value;
+
+        if (!nome || !qtd || !val) return alert("Preencha tudo!");
+
+        produtos.push({ nome, qtd, val });
+        salvar();
+        document.getElementById('prodNome').value = '';
+        document.getElementById('prodQtd').value = '';
+        document.getElementById('prodVal').value = '';
+    }
+
+    function removerProduto(index) {
+        produtos.splice(index, 1);
+        salvar();
+    }
+
+    function renderizar() {
+        const tbody = document.getElementById('listaProdutos');
+        tbody.innerHTML = '';
+        const hoje = new Date();
+
+        produtos.sort((a, b) => new Date(a.val) - new Date(b.val)).forEach((p, index) => {
+            const dataVal = new Date(p.val);
+            const diffTime = dataVal - hoje;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            let classe = '';
+            if (diffDays < 0) classe = 'vencido';
+            else if (diffDays <= 7) classe = 'proximo';
+
+            tbody.innerHTML += `
+                <tr class="${classe}">
+                    <td>${p.nome}</td>
+                    <td>${p.qtd}</td>
+                    <td>${p.val}</td>
+                    <td><button onclick="removerProduto(${index})" style="background:red">X</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    renderizar();
+</script>
+
+</body>
+</html>
