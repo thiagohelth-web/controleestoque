@@ -3,31 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Estoque</title>
+    <title>Meu Controle de Estoque</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
         .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h2 { text-align: center; }
-        .form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        h2 { text-align: center; color: #333; }
+        .form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        button { padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        .vencido { background-color: #ffcccc; }
-        .proximo { background-color: #fff3cd; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        .vencido { background-color: #ffcccc; color: #721c24; }
+        .proximo { background-color: #fff3cd; color: #856404; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Controle de Estoque e Validade</h2>
+    <h2>Cadastrar Produtos</h2>
     <div class="form-group">
         <input type="text" id="prodNome" placeholder="Nome do Produto">
         <input type="number" id="prodQtd" placeholder="Quantidade">
-        <input type="date" id="prodVal" placeholder="Validade">
+        <input type="date" id="prodVal">
         <button onclick="adicionarProduto()">Adicionar Produto</button>
     </div>
 
+    <h2>Estoque Atual</h2>
     <table id="tabelaEstoque">
         <thead>
             <tr>
@@ -42,7 +43,11 @@
 </div>
 
 <script>
-    let produtos = JSON.parse(localStorage.getItem('estoque')) || [];
+    // Se não houver nada, carrega esses exemplos para você ver
+    let produtos = JSON.parse(localStorage.getItem('estoque')) || [
+        { nome: 'Produto Exemplo (Vencido)', qtd: 1, val: '2026-01-01' },
+        { nome: 'Produto Exemplo (Perto)', qtd: 2, val: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0] }
+    ];
 
     function salvar() {
         localStorage.setItem('estoque', JSON.stringify(produtos));
@@ -54,27 +59,31 @@
         const qtd = document.getElementById('prodQtd').value;
         const val = document.getElementById('prodVal').value;
 
-        if (!nome || !qtd || !val) return alert("Preencha tudo!");
+        if (!nome || !qtd || !val) return alert("Por favor, preencha todos os campos!");
 
         produtos.push({ nome, qtd, val });
         salvar();
+        // Limpa campos
         document.getElementById('prodNome').value = '';
         document.getElementById('prodQtd').value = '';
         document.getElementById('prodVal').value = '';
     }
 
     function removerProduto(index) {
-        produtos.splice(index, 1);
-        salvar();
+        if(confirm("Deseja remover este produto?")) {
+            produtos.splice(index, 1);
+            salvar();
+        }
     }
 
     function renderizar() {
         const tbody = document.getElementById('listaProdutos');
         tbody.innerHTML = '';
         const hoje = new Date();
+        hoje.setHours(0,0,0,0);
 
         produtos.sort((a, b) => new Date(a.val) - new Date(b.val)).forEach((p, index) => {
-            const dataVal = new Date(p.val);
+            const dataVal = new Date(p.val + 'T00:00:00');
             const diffTime = dataVal - hoje;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
@@ -87,7 +96,7 @@
                     <td>${p.nome}</td>
                     <td>${p.qtd}</td>
                     <td>${p.val}</td>
-                    <td><button onclick="removerProduto(${index})" style="background:red">X</button></td>
+                    <td><button onclick="removerProduto(${index})" style="background:red">Excluir</button></td>
                 </tr>
             `;
         });
