@@ -1,73 +1,35 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Estoque</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        input[type="number"] { width: 50px; }
-        button { cursor: pointer; padding: 5px 10px; }
-    </style>
-</head>
-<body>
+// Substitua sua função renderizar antiga por esta:
+function renderizar() {
+    const tbody = document.getElementById('listaProdutos');
+    tbody.innerHTML = ''; // Limpa a tabela antes de redesenhar
 
-<div class="container">
-    <h2>Gerenciador de Estoque</h2>
-    <table>
-        <thead>
+    // Supondo que 'produtos' seja sua lista (array)
+    produtos.forEach((p, index) => {
+        tbody.innerHTML += `
             <tr>
-                <th>Produto</th>
-                <th>Qtd</th>
-                <th>Validade</th>
-                <th>Ação</th>
+                <td>${p.nome}</td>
+                <td><input type="number" id="qtd_${index}" value="${p.qtd}" style="width: 50px;"></td>
+                <td><input type="date" id="val_${index}" value="${p.val}"></td>
+                <td>
+                    <button onclick="salvarItem(${index})">Salvar</button>
+                    <button onclick="excluirItem(${index})">X</button>
+                </td>
             </tr>
-        </thead>
-        <tbody id="listaProdutos"></tbody>
-    </table>
-</div>
+        `;
+    });
+}
 
-<script>
-    // Seus produtos iniciais
-    let estoque = JSON.parse(localStorage.getItem('meuEstoque')) || [
-        { nome: "BEB LACTEA UHT TREVO KIDS CX 200ML MORANGO", qtd: 0, val: "" },
-        { nome: "BEB LACTEA UHT TODDYINHO CX 200ML LEVINHO", qtd: 0, val: "" },
-        { nome: "LING FINA SADIA PC 500G GUANABARA", qtd: 0, val: "" },
-        { nome: "MARGARINA CLAYBOM PT 1KG C/SAL", qtd: 0, val: "" }
-        // ... (adicione os outros aqui conforme a lista que você tem)
-    ];
+// Adicione esta função para salvar a alteração
+function salvarItem(index) {
+    // Pega os valores digitados nos inputs daquela linha
+    const novaQtd = document.getElementById(`qtd_${index}`).value;
+    const novaVal = document.getElementById(`val_${index}`).value;
 
-    function renderizar() {
-        const tbody = document.getElementById('listaProdutos');
-        tbody.innerHTML = '';
-        estoque.forEach((item, index) => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${item.nome}</td>
-                    <td><input type="number" id="qtd_${index}" value="${item.qtd}"></td>
-                    <td><input type="date" id="val_${index}" value="${item.val}"></td>
-                    <td><button onclick="salvarItem(${index})">Salvar</button></td>
-                </tr>
-            `;
-        });
-    }
+    // Atualiza o objeto do produto
+    produtos[index].qtd = novaQtd;
+    produtos[index].val = novaVal;
 
-    function salvarItem(index) {
-        const novaQtd = document.getElementById(`qtd_${index}`).value;
-        const novaVal = document.getElementById(`val_${index}`).value;
-        
-        estoque[index].qtd = novaQtd;
-        estoque[index].val = novaVal;
-        
-        localStorage.setItem('meuEstoque', JSON.stringify(estoque));
-        alert("Produto atualizado!");
-    }
-
-    renderizar();
-</script>
-
-</body>
-</html>
+    // Salva no navegador (LocalStorage)
+    localStorage.setItem('estoque', JSON.stringify(produtos));
+    alert("Produto atualizado com sucesso!");
+}
