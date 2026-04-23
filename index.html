@@ -6,223 +6,64 @@
     <title>Meu Estoque</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h2 { text-align: center; }
-        .form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 20px;}
-        input { padding: 12px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-toggle { background: #007bff; width: 100%; margin-bottom: 10px; }
-        #tabelaWrapper { display: none; margin-top: 20px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        input[type="number"] { width: 50px; }
+        button { cursor: pointer; padding: 5px 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Gerenciador de Estoque</h2>
-    
-    <div class="form-group">
-        <input type="text" id="prodNome" placeholder="Nome do Produto">
-        <input type="number" id="prodQtd" placeholder="Quantidade">
-        <input type="date" id="prodVal">
-        <button onclick="adicionarProduto()">Adicionar Novo Produto</button>
-    </div>
-
-    <button class="btn-toggle" onclick="toggleLista()">Mostrar / Ocultar Estoque Completo</button>
-
-    <div id="tabelaWrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>Produto</th>
-                    <th>Qtd</th>
-                    <th>Val</th>
-                    <th>X</th>
-                </tr>
-            </thead>
-            <tbody id="listaProdutos"></tbody>
-        </table>
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Qtd</th>
+                <th>Validade</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody id="listaProdutos"></tbody>
+    </table>
 </div>
 
 <script>
-    // LISTA COMPLETA
-    const listaInicial = [
+    // Seus produtos iniciais
+    let estoque = JSON.parse(localStorage.getItem('meuEstoque')) || [
         { nome: "BEB LACTEA UHT TREVO KIDS CX 200ML MORANGO", qtd: 0, val: "" },
         { nome: "BEB LACTEA UHT TODDYINHO CX 200ML LEVINHO", qtd: 0, val: "" },
-        { nome: "BEB LACTEA UHT TODDYINHO CX 200ML CHOCOLATE", qtd: 0, val: "" },
         { nome: "LING FINA SADIA PC 500G GUANABARA", qtd: 0, val: "" },
-        { nome: "MARGARINA CLAYBOM PT 1KG C/SAL", qtd: 0, val: "" },
-        { nome: "MARGARINA CLAYBOM PT 500G C/SAL", qtd: 0, val: "" },
-        { nome: "MARGARINA CLAYBOM PT 500G S/SAL", qtd: 0, val: "" },
-        { nome: "MARGARINA DELICIA PT 250G C/SAL", qtd: 0, val: "" },
-        { nome: "MARGARINA QUALY PT 1KG C/SAL", qtd: 0, val: "" },
-        { nome: "MARGARINA QUALY PT 250G C/SAL", qtd: 0, val: "" },
-        { nome: "MARGARINA QUALY PT 500G C/SAL", qtd: 0, val: "" },
-        { nome: "PATE SADIA BI 100G PEITO PERU", qtd: 0, val: "" },
-        { nome: "BEB LACTEA UHT YOPRO 250ML 15G PR BAUNILHA", qtd: 0, val: "" },
-        { nome: "PRESUNTO PERDIGAO 200G FATIADO", qtd: 0, val: "" },
-        { nome: "FONDUE CHOCOLATE VIGOR CX 250G", qtd: 0, val: "" },
-        { nome: "PETIT SUISSE DANONINHO 50G 70G MOR PILEVAR", qtd: 0, val: "" },
-        { nome: "PETIT SUISSE DANONINHO 50G 70G MOR/BAN P-LEVAR", qtd: 0, val: "" },
-        { nome: "LEITE UHT DESN GODAM 1L", qtd: 0, val: "" },
-        { nome: "LEITE UHT INTEG GODAM 1L", qtd: 0, val: "" },
-        { nome: "LEITE UHT SEM DESN GODAM 1L", qtd: 0, val: "" },
-        { nome: "MANTEIGA GODAM PT 500G C/SAL", qtd: 0, val: "" },
-        { nome: "MIST REQUEIJAO DICAMPI CP 200G LIGHT", qtd: 0, val: "" },
-        { nome: "MIST REQUEIJAO DICAMPI CP 200G TRAD", qtd: 0, val: "" },
-        { nome: "BEB LACTEA UHT YOPRO 250ML 15G PR BANANA", qtd: 0, val: "" },
-        { nome: "IOGURTE CORPUS FR 170G MORANGO ZR LACTOSE", qtd: 0, val: "" },
-        { nome: "IOGURTE YOPRO FR 250G 15G PT MORANGO", qtd: 0, val: "" },
-        { nome: "IOGURTE DANONINHO FR 100G MORANGO", qtd: 0, val: "" },
-        { nome: "LEITE FERM ACTIVIA FR 170G AMEIXA", qtd: 0, val: "" },
-        { nome: "PETIT SUISSE DANONINHO BDJ 320G POLPA DE MORANGO", qtd: 0, val: "" },
-        { nome: "IOGURTE NAT ITAMBE CP 170G CENOURA/LARANJA/MEL", qtd: 0, val: "" },
-        { nome: "LEITE FERM ITAMBE C/6UN 450G", qtd: 0, val: "" },
-        { nome: "MANTEIGA ITAMBE PT 200G C/SAL", qtd: 0, val: "" },
-        { nome: "MANTEIGA ITAMBE PT 500G C/SAL", qtd: 0, val: "" },
-        { nome: "MANTEIGA ITAMBE TB 200G C/SAL", qtd: 0, val: "" },
-        { nome: "MANTEIGA ITAMBE TB 200G S/SAL", qtd: 0, val: "" },
-        { nome: "GORDURA VEGETAL PRIMOR PC 500G", qtd: 0, val: "" },
-        { nome: "MARGARINA BECEL PT 500G C/SAL", qtd: 0, val: "" },
-        { nome: "MARGARINA DELICIA PT 1KG C/SAL", qtd: 0, val: "" },
-        { nome: "MARGARINA DELICIA PT 500G C/SAL", qtd: 0, val: "" },
-        { nome: "MARGARINA DELICIA SUPREME PT 500G C/SAL", qtd: 0, val: "" },
-        { nome: "LEITE FERM VIGOR 450G TRAD", qtd: 0, val: "" },
-        { nome: "MASSA LASANHA INGRID 200G", qtd: 0, val: "" },
-        { nome: "MASSA NHOQUE MASSA LEVE 500G", qtd: 0, val: "" },
-        { nome: "MORTADELA FRANGO SEARA 400G TURMA DA MONICA", qtd: 0, val: "" },
-        { nome: "PATE SEARA 100G FRANGO", qtd: 0, val: "" },
-        { nome: "PATE SEARA 100G PEITO PERU", qtd: 0, val: "" },
-        { nome: "PATE SEARA 100G PRESUNTO", qtd: 0, val: "" },
-        { nome: "BEB LACTEA UHT ELEGE CX 200ML MORANGO", qtd: 0, val: "" },
-        { nome: "CREME QUARK BATAVO NUV PT 100G PESSEGO E DAMASCO", qtd: 0, val: "" },
-        { nome: "CREME QUARK BATAVO NUV PT 100G TRADICIONAL", qtd: 0, val: "" },
-        { nome: "IOGURTE GREGO BATAVO PT 100G MORANGO", qtd: 0, val: "" },
-        { nome: "IOGURTE GREGO BATAVO PT 100G TRADICIONAL", qtd: 0, val: "" },
-        { nome: "MARGARINA QUALY PT 500G LIGHT C/SAL L-LACTOSE", qtd: 0, val: "" },
-        { nome: "MANTEIGA KREMINAS PT 200G C/SAL", qtd: 0, val: "" },
-        { nome: "MANTEIGA KREMINAS PT 500G C/SAL", qtd: 0, val: "" },
-        { nome: "LEITE FERM ELEGE BOB ESPONJA 480G DESN MOR", qtd: 0, val: "" },
-        { nome: "LEITE FERM ELEGE BOB ESPONJA 480G TRAD", qtd: 0, val: "" },
-        { nome: "LEITE FERM ELEGE BOB ESPONJA 480G UVA", qtd: 0, val: "" },
-        { nome: "LEITE UHT DESN ELEGE 1L", qtd: 0, val: "" },
-        { nome: "LEITE UHT INTEG ELEGE 1L", qtd: 0, val: "" },
-        { nome: "LEITE UHT SEM DESN ELEGE 1L", qtd: 0, val: "" },
-        { nome: "MANTEIGA EXTRA ELEGE TB 200G C/SAL", qtd: 0, val: "" },
-        { nome: "MANTEIGA PRESIDENT TB 200G C/SAL", qtd: 0, val: "" },
-        { nome: "MANTEIGA EXTRA ELEGE PT 200G C/SAL", qtd: 0, val: "" },
-        { nome: "MANTEIGA PRESIDENT PT 380G C/SAL", qtd: 0, val: "" },
-        { nome: "PETIT SUISSE ELEGE BDJ 320G BOB ESPONJA MORANGO", qtd: 0, val: "" },
-        { nome: "MASSA NHOQUE MEZZANI 500G BATATA", qtd: 0, val: "" },
-        { nome: "MASSA RAVIOLLI MEZZANI 400G CARNE", qtd: 0, val: "" },
-        { nome: "MASSA TALHARIM MEZZANI 500G", qtd: 0, val: "" },
-        { nome: "BEB LACTEA UHT QUATA CX 1L CHOCOLATE", qtd: 0, val: "" },
-        { nome: "QUEIJO CHEDDAR POLENGHI 144G SANDWICH", qtd: 0, val: "" },
-        { nome: "MANTEIGA RIO BONITO PT 500G C/SAL", qtd: 0, val: "" },
-        { nome: "CREME RICOTA POLENGHI 150G LIGHT", qtd: 0, val: "" },
-        { nome: "MOLHO POLENGHI CLUB MOLHO PT 220G CEBOLA CARAM", qtd: 0, val: "" },
-        { nome: "MOLHO POLENGHI CLUB MOLHO PT 220G QUEIJO CHEDDAR", qtd: 0, val: "" },
-        { nome: "MANTEIGA REGINA PT 200G C/SAL", qtd: 0, val: "" },
-        { nome: "MASSA P/PASTEL NAPOLES 200G DISCO PEQUENO", qtd: 0, val: "" },
-        { nome: "MASSA P/PASTEL NAPOLES 400G DISCO MEDIA", qtd: 0, val: "" },
-        { nome: "MASSA P/PASTEL NAPOLES 400G DISCO GRANDE", qtd: 0, val: "" },
-        { nome: "MIST REQ C/AMIDO PURANATA 400G TRAD", qtd: 0, val: "" },
-        { nome: "MIST REQ C/AMIDO PURANATA BI 400G CHEDDAR", qtd: 0, val: "" },
-        { nome: "MIST REQ C/AMIDO PURANATA 420G", qtd: 0, val: "" },
-        { nome: "PAO ALHO MENCUCINI PC 300G C/BACON TRAD", qtd: 0, val: "" },
-        { nome: "IOGURTE BICAMADA NESTLE 150G MOR C/CALDA MORANGO", qtd: 0, val: "" },
-        { nome: "IOGURTE GREGO NESTLE BDJ 360G LIGHT MORANGO", qtd: 0, val: "" },
-        { nome: "IOGURTE NESTLE 1.25 KG MORANGO", qtd: 0, val: "" },
-        { nome: "IOGURTE PARC DESN NESTLE 170G MORANGO", qtd: 0, val: "" },
-        { nome: "IOGURTE PARC DESN NESTLE 170G VITAMINA DE FRUTAS", qtd: 0, val: "" },
-        { nome: "IOGURTE PARC DESN NESTLE GF 900G MORANGO", qtd: 0, val: "" },
-        { nome: "IOGURTE CHAMYTO GO SQZ 100G MORANGO", qtd: 0, val: "" },
-        { nome: "IOGURTE CHAMYTO GO SQZ 100G VITAMINA FRUTAS", qtd: 0, val: "" },
-        { nome: "IOGURTE CHAMYTO BDJ 130G MOR C/CEREAL CHOC", qtd: 0, val: "" },
-        { nome: "IOGURTE CHAMYTO BDJ 130G MOR C/CEREAL COLORIDO", qtd: 0, val: "" },
-        { nome: "IOGURTE NESTLE NINHO FR 170G MORANGO", qtd: 0, val: "" },
-        { nome: "IOGURTE NESTLE NINHO SOLEIL FR 170G MACA/BANANA", qtd: 0, val: "" },
-        { nome: "IOGURTE NESTLE NINHO SOLEIL FR 170G MORANGO", qtd: 0, val: "" },
-        { nome: "IOGURTE NESTLE NINHO SOLEIL 540G POLPA TRI SABORES", qtd: 0, val: "" },
-        { nome: "LEITE FERM CHAMYTO C/6 450G TRAD", qtd: 0, val: "" },
-        { nome: "PETIT SUISSE CHAMBINHO BDJ 320G MACA/BANANA", qtd: 0, val: "" },
-        { nome: "PETIT SUISSE CHAMBINHO BDJ 320G MORANGO", qtd: 0, val: "" },
-        { nome: "MASSA P/PASTEL INGRID 400G DISCAO COMERCIAL", qtd: 0, val: "" },
-        { nome: "IOGURTE NAT NESTLE CP 170G MEL", qtd: 0, val: "" },
-        { nome: "LEITE UHT SEM DESN PIRACANJUBA 1L ZR LACTOSE C/TAMP", qtd: 0, val: "" },
-        { nome: "MASSA NHOQUE SABOR ITALIANO 500G AIPIM", qtd: 0, val: "" },
-        { nome: "MASSA NHOQUE SABOR ITALIANO 500G BATATA", qtd: 0, val: "" },
-        { nome: "QUEIJO CHEDDAR SADIA 120G FATIADO", qtd: 0, val: "" },
-        { nome: "BEB LACTEA UHT TREVO KIDS CX 200ML CHOCOLATE", qtd: 0, val: "" },
-        { nome: "MANTEIGA REGINA TB 200G C/SAL", qtd: 0, val: "" },
-        { nome: "MARGARINA DORIANA PT 500G C/SAL", qtd: 0, val: "" },
-        { nome: "MARGARINA DORIANA PT 500G S/SAL", qtd: 0, val: "" },
-        { nome: "MASSA P/PASTEL MEZZANI 200G CUMBUCA", qtd: 0, val: "" },
-        { nome: "PAO ALHO ALHISSIMO PC 400G TRAD", qtd: 0, val: "" },
-        { nome: "PAO ALHO MENCUCINI PC 300G C/QUEIJO TRAD", qtd: 0, val: "" },
-        { nome: "PETIT SUISSE DANONINHO 480G L-P MORANGO", qtd: 0, val: "" },
-        { nome: "MARGARINA QUALY PT 1KG C/SAL", qtd: 0, val: "" },
-        { nome: "IOGURTE NESTLE NINHO GF 850G MACA/BANANA", qtd: 0, val: "" },
-        { nome: "PAO ALHO SANTA MASSA 400G TRADICIONAL", qtd: 0, val: "" },
-        { nome: "BEB LACTEA UHT PIRAKIDS CX 200ML CHOCOLATE", qtd: 0, val: "" },
-        { nome: "IOGURTE BATAVO PENSE ZERO CP 100G PEDACOS/MORANGO", qtd: 0, val: "" },
-        { nome: "MASSA P/PIZZA MEZZANI 270G FRIGIDEIRA", qtd: 0, val: "" }
+        { nome: "MARGARINA CLAYBOM PT 1KG C/SAL", qtd: 0, val: "" }
+        // ... (adicione os outros aqui conforme a lista que você tem)
     ];
-
-    let produtos = JSON.parse(localStorage.getItem('estoque'));
-    
-    // Se não tiver nada no estoque, carrega a lista
-    if (!produtos || produtos.length === 0) {
-        produtos = listaInicial;
-        localStorage.setItem('estoque', JSON.stringify(produtos));
-    }
-
-    function toggleLista() {
-        const div = document.getElementById('tabelaWrapper');
-        div.style.display = (div.style.display === 'block') ? 'none' : 'block';
-    }
-
-    function salvar() {
-        localStorage.setItem('estoque', JSON.stringify(produtos));
-        renderizar();
-    }
-
-    function adicionarProduto() {
-        const nome = document.getElementById('prodNome').value;
-        const qtd = document.getElementById('prodQtd').value;
-        const val = document.getElementById('prodVal').value;
-
-        if (!nome) return alert("Digite o nome do produto!");
-
-        produtos.push({ nome, qtd, val });
-        salvar();
-        document.getElementById('prodNome').value = '';
-        document.getElementById('prodQtd').value = '';
-        document.getElementById('prodVal').value = '';
-    }
-
-    function removerProduto(index) {
-        if(confirm("Remover?")) {
-            produtos.splice(index, 1);
-            salvar();
-        }
-    }
 
     function renderizar() {
         const tbody = document.getElementById('listaProdutos');
         tbody.innerHTML = '';
-        produtos.forEach((p, index) => {
+        estoque.forEach((item, index) => {
             tbody.innerHTML += `
                 <tr>
-                    <td>${p.nome}</td>
-                    <td>${p.qtd}</td>
-                    <td>${p.val}</td>
-                    <td><button onclick="removerProduto(${index})" style="background:red; padding: 5px;">X</button></td>
+                    <td>${item.nome}</td>
+                    <td><input type="number" id="qtd_${index}" value="${item.qtd}"></td>
+                    <td><input type="date" id="val_${index}" value="${item.val}"></td>
+                    <td><button onclick="salvarItem(${index})">Salvar</button></td>
                 </tr>
             `;
         });
+    }
+
+    function salvarItem(index) {
+        const novaQtd = document.getElementById(`qtd_${index}`).value;
+        const novaVal = document.getElementById(`val_${index}`).value;
+        
+        estoque[index].qtd = novaQtd;
+        estoque[index].val = novaVal;
+        
+        localStorage.setItem('meuEstoque', JSON.stringify(estoque));
+        alert("Produto atualizado!");
     }
 
     renderizar();
