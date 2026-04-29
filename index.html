@@ -3,66 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Supermercado</title>
+    <title>MercadoFácil - Simulador Concierge</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; display: flex; justify-content: center; }
-        .app { width: 100%; max-width: 400px; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        button { display: block; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 8px; background: #007bff; color: white; font-weight: bold; cursor: pointer; text-align: left; }
-        h2 { text-align: center; color: #333; margin-bottom: 20px; }
-        .btn-voltar { background: #6c757d; text-align: center; }
-        .btn-verde { background: #28a745; text-align: center; }
-        .carrinho { font-size: 1.1em; color: #333; padding: 5px 0; border-bottom: 1px solid #eee; }
-        .total { font-size: 1.3em; font-weight: bold; color: green; text-align: center; margin-top: 20px; border-top: 2px solid #eee; padding-top: 10px; }
+        /* TEMA DARK E CORES (Conforme Fotos) */
+        :root { --fundo: #0d0d0d; --cartao: #1c1c1c; --amarelo: #ffc107; --texto: #ffffff; --cinza: #8c8c8c; --verde: #28a745; --vermelho: #dc3545; }
+        body { font-family: sans-serif; margin: 0; padding: 10px; background: var(--fundo); color: var(--texto); display: flex; justify-content: center; }
+        .app-mobile { width: 100%; max-width: 375px; height: 100vh; background: var(--fundo); position: relative; overflow-y: auto; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+        h2 { font-size: 1.1rem; text-align: center; color: var(--texto); margin: 15px 0; }
+        .texto-cinza { color: var(--cinza); font-size: 0.9rem; text-align: center; margin-bottom: 10px; }
+        
+        /* BOTÕES E CARDS (Estilo Fotos) */
+        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; }
+        .btn-setor, .btn-prod, .card-mercado { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 15px; margin-bottom: 8px; background: var(--cartao); color: var(--texto); text-align: left; }
+        .btn-verde { background: var(--verde); text-align: center; color: white; display: block; width: calc(100% - 30px); margin: 15px; }
+        .btn-voltar { background: transparent; color: var(--amarelo); margin: 10px 15px; }
+        .btn-add { background: var(--amarelo); color: #000; font-size: 0.8rem; padding: 5px 10px; }
+        .btn-whatsapp { background: var(--verde); color: white; margin-top: 15px; }
+        .resumo-preco { color: var(--amarelo); font-size: 0.9rem; margin-top: 3px; }
+
+        /* ÍCONES SIMULADOS */
+        .icone { width: 24px; text-align: center; margin-right: 15px; font-size: 1.2rem; }
+
+        /* GRID SETORES (Foto 4) */
+        .grid-setores { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 10px; }
+        .btn-setor { flex-direction: column; align-items: flex-start; padding: 10px; margin-bottom: 0; }
+        .grid-setores .icone { margin-bottom: 5px; }
+
+        /* PAINEL COMPARAÇÃO (Foto 7) */
+        .badge-economia { background: var(--cartao); border: 1px solid var(--amarelo); color: var(--amarelo); padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; text-align: center; margin: 10px 15px; }
+        .card-mercado.menor-preco { border: 2px solid var(--amarelo); }
+        .info-menor { color: var(--amarelo); font-size: 0.8rem; }
+        .info-caro { color: var(--cinza); font-size: 0.8rem; }
+        
+        /* CARRINHO (Foto 8) */
+        .total-estimado { font-size: 1.4rem; font-weight: bold; text-align: right; color: var(--texto); margin-top: 20px; border-top: 2px solid var(--cinza); padding: 15px; }
+        .cart-info { font-size: 0.8rem; color: var(--cinza); margin-left: 15px; margin-top: 10px; }
+        .cart-item-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 15px; border-bottom: 1px solid #333; }
+        .cart-item-preco { text-align: right; }
     </style>
 </head>
 <body>
 
-<div class="app" id="app"></div>
+<div class="app-mobile" id="app"></div>
 
 <script>
+    // 1. BANCO DE DADOS (Simulado - Com Preços e Ícones sugeridos pelas fotos)
     const db = {
-        "Hortifrúti": { "Tomate": {"M1": 5.90, "M2": 6.50}, "Cebola": {"M1": 3.50, "M2": 3.90} },
-        "Açougue e Peixaria": { "Carne Moída": {"M1": 28.00, "M2": 26.50} },
-        "Padaria e Confeitaria": { "Pão Francês": {"M1": 12.00, "M2": 13.50} },
-        "Frios e Laticínios": { "Leite": {"M1": 4.50, "M2": 4.20} },
-        "Congelados": { "Pizza": {"M1": 18.00, "M2": 17.50} },
-        "Mercearia": { "Arroz": {"M1": 24.00, "M2": 25.00} },
-        "Bebidas": { "Refrigerante": {"M1": 8.00, "M2": 7.50} },
-        "Matinais": { "Café": {"M1": 15.00, "M2": 14.50} },
-        "Higiene": { "Sabonete": {"M1": 2.50, "M2": 2.20} },
-        "Limpeza": { "Detergente": {"M1": 2.00, "M2": 1.90} },
-        "Bazar": { "Esponja": {"M1": 3.00, "M2": 2.80} },
-        "Mundo Pet": { "Ração": {"M1": 12.00, "M2": 11.50} },
-        "Infantil": { "Fralda": {"M1": 35.00, "M2": 33.00} }
+        "Hortifrúti": { 
+            icone: "🍎",
+            "Tomate": { "Atacadão": 5.40, "Mercado Central": 5.90, "SuperBom": 6.50 },
+            "Cebola": { "Atacadão": 3.20, "SuperBom": 3.90 },
+            "Batata": { "Mercado Central": 4.50 },
+            "Alface": { "SuperBom": 2.50 }
+        },
+        "Açougue e Peixaria": { 
+            icone: "🍗",
+            "Carne Moída": { "Mercado Central": 28.00, "Atacadão": 26.50 },
+            "Peito Frango": { "Atacadão": 14.90, "SuperBom": 16.00 }
+        },
+        "Padaria": { icone: "🍞", "Pão Francês": { "SuperBom": 12.00, "Mercado Central": 13.50 } },
+        "Bebidas": { icone: "🥛", "Refrigerante": { "Atacadão": 8.00, "SuperBom": 7.50 } },
+        "Limpeza": { icone: "🧹", "Detergente": { "SuperBom": 2.00, "Atacadão": 1.90 } },
+        "Mundo Pet": { icone: "🐾", "Ração": { "Atacadão": 12.00, "SuperBom": 11.50 } },
+        // Adicionar outros setores e produtos seguindo o mesmo padrão...
     };
 
     let estado = { tela: 'menu', setor: '', carrinho: [] };
 
+    // 2. MOTOR DO SIMULADOR (Controla as trocas de tela com design Dark)
     function render() {
         const app = document.getElementById('app');
-        app.innerHTML = '';
+        app.innerHTML = ''; // Limpa a tela
+
         if (estado.tela === 'menu') {
-            app.innerHTML = '<h2>Setores</h2>';
-            Object.keys(db).forEach(s => app.innerHTML += `<button onclick="ir('produtos', '${s}')">${s}</button>`);
-            app.innerHTML += `<button class="btn-verde" onclick="ir('carrinho')">Ver Carrinho</button>`;
+            app.innerHTML = `<h2>O que você precisa hoje?</h2><p class="texto-cinza">Compare preços. Economize de verdade.</p><div class="grid-setores"></div>`;
+            const grid = app.querySelector('.grid-setores');
+            Object.keys(db).forEach(s => {
+                grid.innerHTML += `<button class="btn-setor" onclick="ir('produtos', '${s}')"><span class="icone">${db[s].icone}</span>${s}</button>`;
+            });
+            app.innerHTML += `<button class="btn-verde" onclick="ir('carrinho')">🛒 Ver Carrinho</button>`;
         } 
+        
         else if (estado.tela === 'produtos') {
-            app.innerHTML = `<h2>${estado.setor}</h2><button class="btn-voltar" onclick="ir('menu')">Voltar</button>`;
-            Object.keys(db[estado.setor]).forEach(p => app.innerHTML += `<button onclick="ir('comparar', '${p}')">${p}</button>`);
+            app.innerHTML = `<button class="btn-voltar" onclick="ir('menu')">‹ Voltar</button><h2>${estado.setor}</h2><p class="cart-info">4 produtos</p>`;
+            Object.keys(db[estado.setor]).filter(k => k !== 'icone').forEach(p => {
+                // Calcula o preço "a partir de" (menor preço)
+                const precos = db[estado.setor][p];
+                const menor = Math.min(...Object.values(precos));
+                app.innerHTML += `<button class="btn-prod" onclick="ir('comparar', '${p}')">
+                                    <span>${p}<br><span class="resumo-preco">a partir de R$ ${menor.toFixed(2)}</span></span>
+                                    <span>›</span>
+                                 </button>`;
+            });
         }
+
         else if (estado.tela === 'comparar') {
-            app.innerHTML = `<h2>${estado.produto}</h2><button class="btn-voltar" onclick="ir('produtos', '${estado.setor}')">Voltar</button>`;
+            app.innerHTML = `<button class="btn-voltar" onclick="ir('produtos', '${estado.setor}')">‹ Voltar</button><h2>${estado.produto}</h2><p class="texto-cinza">Escolha o mercado e adicione ao carrinho</p>`;
+            
             const precos = db[estado.setor][estado.produto];
-            Object.keys(precos).forEach(m => app.innerHTML += `<button onclick="add('${estado.produto}', '${m}', ${precos[m]})">${m}: R$ ${precos[m].toFixed(2)}</button>`);
+            const menor = Math.min(...Object.values(precos));
+            const economia = Math.max(...Object.values(precos)) - menor;
+
+            app.innerHTML += `<div class="badge-economia">📉 Economize até R$ ${economia.toFixed(2)} escolhendo certo</div>`;
+
+            Object.keys(precos).forEach(m => {
+                const preco = precos[m];
+                const eMenor = preco === menor;
+                app.innerHTML += `
+                    <div class="card-mercado ${eMenor ? 'menor-preco' : ''}">
+                        <span>${m}${eMenor ? '<br><span class="info-menor">✦ Menor preço</span>' : '<br><span class="info-caro">+' + ( ((preco - menor) / menor) * 100).toFixed(0) + '% mais caro</span>'}</span>
+                        <span><strong>R$ ${preco.toFixed(2)}</strong> <button class="btn-add" onclick="add('${estado.produto}', '${m}', ${preco})">+</button></span>
+                    </div>`;
+            });
         }
+
         else if (estado.tela === 'carrinho') {
-            app.innerHTML = `<h2>Carrinho</h2><button class="btn-voltar" onclick="ir('menu')">Voltar</button>`;
+            app.innerHTML = `<button class="btn-voltar" onclick="ir('menu')">‹ Voltar</button><h2>Carrinho</h2><p class="cart-info">1 item</p><button class="btn-voltar" style="margin-left:auto">🧹 Limpar tudo</button>`;
             let total = 0;
-            estado.carrinho.forEach(item => { total += item.preco; app.innerHTML += `<div class="carrinho">${item.prod} (${item.mercado}): R$ ${item.preco.toFixed(2)}</div>`; });
-            app.innerHTML += `<div class="total">Total: R$ ${total.toFixed(2)}</div>`;
+            
+            estado.carrinho.forEach((item, idx) => {
+                total += item.preco;
+                app.innerHTML += `
+                    <div class="cart-item-row">
+                        <span><strong>${item.mercado}</strong><br><span class="texto-cinza">${item.prod}<br>${estado.setor}</span></span>
+                        <span class="cart-item-preco"><strong>R$ ${item.preco.toFixed(2)}</strong><br><button onclick="remove(${idx})" style="background:transparent; color:var(--vermelho); font-size:1rem; padding:0">🗑️</button></span>
+                    </div>`;
+            });
+            
+            app.innerHTML += `
+                <div class="total-estimado">
+                    <span class="texto-cinza" style="display:block; text-align:right">Total estimado</span>
+                    R$ ${total.toFixed(2)}
+                </div>
+                <button class="btn-verde btn-whatsapp" onclick="alert('Enviando pedido via WhatsApp...')">Finalizar pedido ›</button>
+            `;
         }
     }
 
+    // 3. AÇÕES (Lógica que já discutimos)
     function ir(tela, param) {
         if(tela === 'produtos') { estado.tela = 'produtos'; estado.setor = param; }
         else if(tela === 'comparar') { estado.tela = 'comparar'; estado.produto = param; }
@@ -73,8 +151,15 @@
 
     function add(prod, mercado, preco) {
         estado.carrinho.push({prod, mercado, preco});
-        alert(prod + " adicionado!");
+        alert(prod + " adicionado ao carrinho!");
     }
+
+    function remove(idx) {
+        estado.carrinho.splice(idx, 1);
+        render();
+    }
+
+    // Inicia o simulador
     render();
 </script>
 </body>
