@@ -8,45 +8,30 @@
         :root { --preto: #000000; --grafite: #1a1a1a; --amarelo: #ffcc00; --branco: #ffffff; --cinza: #888888; --verde-whats: #25d366; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #f0f0f0; display: flex; justify-content: center; }
-        
         .mobile-container { width: 100%; max-width: 400px; height: 100vh; background: var(--preto); color: var(--branco); position: relative; overflow-x: hidden; }
         .page { display: none; padding: 20px; height: 100%; flex-direction: column; overflow-y: auto; }
         .active { display: flex; }
-
-        /* HEADER E LOGO */
         .header { text-align: center; padding: 40px 20px; }
         .logo-box { background: var(--amarelo); width: 60px; height: 60px; border-radius: 15px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: black; }
         .title { font-size: 28px; font-weight: bold; }
         .subtitle { color: var(--cinza); margin-top: 10px; font-size: 14px; }
-
-        /* INPUTS */
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-size: 12px; color: var(--cinza); text-transform: uppercase; }
         input { width: 100%; padding: 15px; background: var(--grafite); border: 1px solid #333; border-radius: 10px; color: white; }
-        
-        /* BOTÕES */
-        .btn-main { background: var(--grafite); color: white; padding: 18px; border-radius: 12px; border: none; font-weight: bold; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .btn-main { background: var(--grafite); color: white; padding: 18px; border-radius: 12px; border: none; font-weight: bold; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; }
         .btn-yellow { background: var(--amarelo); color: black; }
-        .btn-back { background: none; border: none; color: white; font-size: 20px; align-self: flex-start; margin-bottom: 20px; }
-
-        /* GRID SETORES (IGUAL PRINTS 2 e 3) */
+        .btn-back { background: none; border: none; color: white; font-size: 20px; align-self: flex-start; margin-bottom: 20px; cursor: pointer; }
         .grid-setores { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .setor-card { background: var(--grafite); padding: 20px; border-radius: 15px; display: flex; flex-direction: column; gap: 10px; border: none; color: white; text-align: left; }
+        .setor-card { background: var(--grafite); padding: 20px; border-radius: 15px; display: flex; flex-direction: column; gap: 10px; border: none; color: white; text-align: left; cursor: pointer; }
         .setor-icon { color: var(--amarelo); font-size: 24px; }
-
-        /* LISTA PRODUTOS */
-        .prod-item { background: var(--grafite); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .prod-item { background: var(--grafite); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .price-tag { color: var(--amarelo); font-size: 14px; }
-
-        /* COMPARAÇÃO */
         .comp-card { background: var(--grafite); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
         .best-price { border: 1px solid var(--amarelo); }
         .badge { color: var(--amarelo); font-size: 10px; font-weight: bold; }
-
-        /* POPUP FINAL */
         .overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10; justify-content: center; align-items: flex-end; }
         .popup { background: var(--grafite); width: 100%; padding: 30px; border-radius: 30px 30px 0 0; }
-        .btn-whats { background: var(--verde-whats); width: 100%; padding: 15px; border-radius: 10px; color: white; border: none; font-weight: bold; margin-top: 20px; }
+        .btn-whats { background: var(--verde-whats); width: 100%; padding: 15px; border-radius: 10px; color: white; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -64,7 +49,7 @@
         </div>
         <div class="form-group">
             <label>WhatsApp</label>
-            <input type="tel" placeholder="(22) 99999-9999" id="userTel">
+            <input type="tel" placeholder="(22) 99277-7193" id="userTel">
         </div>
         <button class="btn-main" onclick="nextPage('page2')">Entrar e comparar preços ➔</button>
     </div>
@@ -72,43 +57,20 @@
     <div class="page" id="page2">
         <h2>O que você precisa hoje?</h2>
         <p class="subtitle" style="text-align:left; margin-bottom:20px;">Compare preços. Economize de verdade.</p>
-        <div class="grid-setores">
-            <button class="setor-card" onclick="openSetor('Hortifrúti')"><span class="setor-icon">🍎</span>Hortifrúti</button>
-            <button class="setor-card" onclick="openSetor('Açougue')"><span class="setor-icon">🍖</span>Açougue e Peixaria</button>
-            <button class="setor-card"><span class="setor-icon">🍞</span>Padaria</button>
-            <button class="setor-card"><span class="setor-icon">🥛</span>Frios</button>
-            <button class="setor-card"><span class="setor-icon">🍕</span>Congelados</button>
-            <button class="setor-card"><span class="setor-icon">📦</span>Mercearia</button>
-        </div>
+        <div class="grid-setores" id="gridSetores"></div>
+        <button class="btn-main btn-yellow" onclick="nextPage('pageCart')" style="margin-top:20px; justify-content:center;">Ver Carrinho</button>
     </div>
 
     <div class="page" id="pageProducts">
         <button class="btn-back" onclick="nextPage('page2')">←</button>
-        <h2 id="setorTitle">Hortifrúti</h2>
-        <p class="subtitle" style="text-align:left; margin-bottom:20px;">4 produtos</p>
-        <div class="prod-item" onclick="openComp('Tomate')">
-            <div>Tomate<br><span class="price-tag">a partir de R$ 5,40</span></div>
-            <span>➔</span>
-        </div>
-        <div class="prod-item">
-            <div>Cebola<br><span class="price-tag">a partir de R$ 3,20</span></div>
-            <span>➔</span>
-        </div>
+        <h2 id="setorTitle">Setor</h2>
+        <div id="productContainer" style="margin-top:20px;"></div>
     </div>
 
     <div class="page" id="pageComp">
-        <button class="btn-back" onclick="nextPage('pageProducts')">←</button>
-        <h2 id="prodTitle">Tomate</h2>
-        <p class="subtitle" style="text-align:left; margin-bottom:20px;">Escolha o mercado e adicione ao carrinho</p>
-        
-        <div class="comp-card best-price">
-            <div>Atacadão<br><span class="badge">✦ MENOR PREÇO</span></div>
-            <div><strong>R$ 5,40</strong> <button class="btn-yellow" onclick="addCart('Tomate', 5.40, 'Atacadão')" style="padding:5px 10px; border-radius:5px; border:none">+</button></div>
-        </div>
-        <div class="comp-card">
-            <div>Mercado Central<br><span class="subtitle">+9% mais caro</span></div>
-            <div><strong>R$ 5,90</strong> <button style="padding:5px 10px; border-radius:5px; border:none">+</button></div>
-        </div>
+        <button class="btn-back" onclick="goBackProducts()">←</button>
+        <h2 id="prodTitle">Produto</h2>
+        <div id="comparisonContainer" style="margin-top:20px;"></div>
     </div>
 
     <div class="page" id="pageCart">
@@ -117,7 +79,7 @@
         <div id="cartItems" style="margin-top:20px;"></div>
         <div style="margin-top:auto; padding:20px 0; border-top:1px solid #333;">
             <div style="display:flex; justify-content:space-between; font-size:20px;">
-                <span>Total estimado</span>
+                <span>Total</span>
                 <span id="cartTotal">R$ 0,00</span>
             </div>
             <button class="btn-main btn-yellow" onclick="showFinal()" style="margin-top:20px; justify-content:center;">Finalizar pedido</button>
@@ -126,41 +88,69 @@
 
     <div class="overlay" id="overlay">
         <div class="popup">
-            <div style="display:flex; justify-content:space-between;">
-                <h3>Finalizar</h3>
-                <button onclick="closeFinal()" style="background:none; border:none; color:white;">✕</button>
-            </div>
-            <p class="subtitle" style="margin:15px 0;">Informe seus dados para entrarmos em contato e confirmar sua entrega.</p>
-            <div class="form-group">
-                <input type="text" id="finalName" readonly>
-            </div>
-            <div class="form-group">
-                <input type="text" id="finalTel" readonly>
-            </div>
-            <button class="btn-whats">Enviar via WhatsApp</button>
+            <h3>Finalizar</h3>
+            <p class="subtitle" style="margin:15px 0;">Confirmar envio do pedido via WhatsApp?</p>
+            <button class="btn-whats" onclick="sendWhatsApp()">Enviar via WhatsApp</button>
+            <button onclick="closeFinal()" style="background:none; border:none; color:white; width:100%; margin-top:10px;">Cancelar</button>
         </div>
     </div>
 </div>
 
 <script>
+    const database = {
+        "Hortifrúti": { icon: "🍎", products: { "Tomate": { "Atacadão": 5.40, "Mercado Central": 5.90 }, "Cebola": { "Atacadão": 3.20, "Mercado Central": 3.50 } } },
+        "Açougue": { icon: "🍖", products: { "Carne Moída": { "Atacadão": 26.50, "Mercado Central": 28.90 } } },
+        "Padaria": { icon: "🍞", products: { "Pão Francês": { "Mercado Central": 12.00 } } },
+        "Frios": { icon: "🥛", products: { "Leite": { "Atacadão": 4.50 } } },
+        "Congelados": { icon: "🍕", products: { "Pizza": { "Mercado Central": 18.00 } } },
+        "Mercearia": { icon: "📦", products: { "Arroz 5kg": { "Atacadão": 24.90 } } },
+        "Bebidas": { icon: "🥤", products: { "Refrigerante": { "Atacadão": 7.90 } } },
+        "Matinais": { icon: "☕", products: { "Café": { "Mercado Central": 14.50 } } },
+        "Higiene": { icon: "🪥", products: { "Sabonete": { "Atacadão": 2.50 } } },
+        "Limpeza": { icon: "🧹", products: { "Detergente": { "Mercado Central": 1.90 } } },
+        "Bazar": { icon: "🛠️", products: { "Lâmpada": { "Atacadão": 9.90 } } },
+        "Mundo Pet": { icon: "🐾", products: { "Ração": { "Atacadão": 15.00 } } },
+        "Infantil": { icon: "👶", products: { "Fralda": { "Mercado Central": 35.00 } } }
+    };
+
     let cart = [];
-    
+    let currentSetor = "";
+
     function nextPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id === 'page2') {
-            document.getElementById('finalName').value = document.getElementById('userName').value;
-            document.getElementById('finalTel').value = document.getElementById('userTel').value;
-        }
+        if(id === 'page2' && document.getElementById('gridSetores').innerHTML === "") initGrid();
     }
 
-    function openSetor(name) {
-        document.getElementById('setorTitle').innerText = name;
+    function initGrid() {
+        const grid = document.getElementById('gridSetores');
+        Object.keys(database).forEach(s => {
+            grid.innerHTML += `<button class="setor-card" onclick="openSetor('${s}')"><span class="setor-icon">${database[s].icon}</span>${s}</button>`;
+        });
+    }
+
+    function openSetor(s) {
+        currentSetor = s;
+        document.getElementById('setorTitle').innerText = s;
+        const cont = document.getElementById('productContainer');
+        cont.innerHTML = "";
+        Object.keys(database[s].products).forEach(p => {
+            const min = Math.min(...Object.values(database[s].products[p]));
+            cont.innerHTML += `<div class="prod-item" onclick="openComp('${p}')"><div>${p}<br><span class="price-tag">a partir de R$ ${min.toFixed(2)}</span></div><span>➔</span></div>`;
+        });
         nextPage('pageProducts');
     }
 
-    function openComp(name) {
-        document.getElementById('prodTitle').innerText = name;
+    function openComp(p) {
+        document.getElementById('prodTitle').innerText = p;
+        const cont = document.getElementById('comparisonContainer');
+        cont.innerHTML = "";
+        const stores = database[currentSetor].products[p];
+        const minPrice = Math.min(...Object.values(stores));
+        Object.keys(stores).forEach(m => {
+            const isBest = stores[m] === minPrice;
+            cont.innerHTML += `<div class="comp-card ${isBest ? 'best-price' : ''}"><div>${m}${isBest ? '<br><span class="badge">✦ MENOR PREÇO</span>' : ''}</div><div><strong>R$ ${stores[m].toFixed(2)}</strong> <button class="btn-yellow" onclick="addCart('${p}', ${stores[m]}, '${m}')" style="padding:5px 10px; border-radius:5px; border:none; margin-left:10px; cursor:pointer;">+</button></div></div>`;
+        });
         nextPage('pageComp');
     }
 
@@ -172,17 +162,27 @@
 
     function updateCart() {
         const cont = document.getElementById('cartItems');
-        cont.innerHTML = '';
+        cont.innerHTML = "";
         let t = 0;
-        cart.forEach(i => {
+        cart.forEach((i, index) => {
             t += i.v;
-            cont.innerHTML += `<div class="prod-item"><div><strong>${i.m}</strong><br>${i.p}</div><div>R$ ${i.v.toFixed(2)}</div></div>`;
+            cont.innerHTML += `<div class="prod-item"><div><strong>${i.m}</strong><br>${i.p}</div><div style="text-align:right">R$ ${i.v.toFixed(2)}<br><small onclick="removeItem(${index})" style="color:red; cursor:pointer">remover</small></div></div>`;
         });
         document.getElementById('cartTotal').innerText = `R$ ${t.toFixed(2)}`;
     }
 
+    function removeItem(index) { cart.splice(index, 1); updateCart(); }
+    function goBackProducts() { nextPage('pageProducts'); }
     function showFinal() { document.getElementById('overlay').style.display = 'flex'; }
     function closeFinal() { document.getElementById('overlay').style.display = 'none'; }
+
+    function sendWhatsApp() {
+        const name = document.getElementById('userName').value || "Cliente";
+        let msg = `Olá! Meu nome é ${name}. Gostaria de fazer o seguinte pedido:\n\n`;
+        cart.forEach(i => msg += `- ${i.p} (${i.m}): R$ ${i.v.toFixed(2)}\n`);
+        msg += `\n*Total Estimado: ${document.getElementById('cartTotal').innerText}*`;
+        window.open(`https://wa.me/5522992777193?text=${encodeURIComponent(msg)}`);
+    }
 </script>
 </body>
 </html>
