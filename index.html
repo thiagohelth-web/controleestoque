@@ -1,35 +1,129 @@
-// Substitua sua função renderizar antiga por esta:
-function renderizar() {
-    const tbody = document.getElementById('listaProdutos');
-    tbody.innerHTML = ''; // Limpa a tabela antes de redesenhar
+import React, { useState, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import Header from "@/components/supermarket/Header";
+import SectorGrid from "@/components/supermarket/SectorGrid";
+import ProductList from "@/components/supermarket/ProductList";
+import PriceComparison from "@/components/supermarket/PriceComparison";
+import Cart from "@/components/supermarket/Cart";
+import CheckoutModal from "@/components/supermarket/CheckoutModal";
+import RegisterScreen from "@/components/supermarket/RegisterScreen";
 
-    // Supondo que 'produtos' seja sua lista (array)
-    produtos.forEach((p, index) => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${p.nome}</td>
-                <td><input type="number" id="qtd_${index}" value="${p.qtd}" style="width: 50px;"></td>
-                <td><input type="date" id="val_${index}" value="${p.val}"></td>
-                <td>
-                    <button onclick="salvarItem(${index})">Salvar</button>
-                    <button onclick="excluirItem(${index})">X</button>
-                </td>
-            </tr>
-        `;
-    });
-}
+const pageTransition = {
+  initial: { opacity: 0, x: 30 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -30 },
+  transition: { duration: 0.2, ease: "easeOut" },
+};
 
-// Adicione esta função para salvar a alteração
-function salvarItem(index) {
-    // Pega os valores digitados nos inputs daquela linha
-    const novaQtd = document.getElementById(`qtd_${index}`).value;
-    const novaVal = document.getElementById(`val_${index}`).value;
+export default function Home() {
+  const [screen, setScreen] = useState("sectors");
+  const [selectedSector, setSelectedSector] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [user, setUser] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [showCheckout, setShowCheckout] = useState(false);
 
-    // Atualiza o objeto do produto
-    produtos[index].qtd = novaQtd;
-    produtos[index].val = novaVal;
+  const navigateTo = useCallback(
+    (newScreen, data = {}) => {
+      setHistory((prev) => [...prev, { screen, selectedSector, selectedProduct }]);
+      setScreen(newScreen);
+      if (data.sector !== undefined) setSelectedSector(data.sector);
+      if (data.product !== undefined) setSelectedProduct(data.product);
+    },
+    [screen, selectedSector, selectedProduct]
+  );
 
-    // Salva no navegador (LocalStorage)
-    localStorage.setItem('estoque', JSON.stringify(produtos));
-    alert("Produto atualizado com sucesso!");
+  const goBack = useCallback(() => {
+    const prev = history[history.length - 1];
+    if (prev) {
+      setScreen(prev.screen);
+      setSelectedSector(prev.selectedSector);
+      setSelectedProduct(prev.selectedProduct);
+      setHistory((h) => h.slice(0, -1));
+    } else {
+      setScreen("sectors");
+    }
+  }, [history]);
+
+  const addToCart = useCallback((item) => {
+    setCart((prev) => [...prev, item]);
+  }, []);
+
+  const removeFromCart = useCallback((globalIndex) => {
+    setCart((prev) => prev.filter((_, i) => i !== globalIndex));
+  }, []);
+
+  const clearCart = useCallback(() => setCart([]), []);
+
+  if (!user) {
+    return <RegisterScreen onComplete={(data) => setUser(data)} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header
+        screen={screen}
+        cartCount={cart.length}
+        onBack={goBack}
+        onCartClick={() => navigateTo("cart")}
+      />
+
+      <main className="max-w-lg mx-auto px-4 py-6">
+        <AnimatePresence mode="wait">
+          {screen === "sectors" && (
+            <motion.div key="sectors" {...pageTransition}>
+              <SectorGrid
+                onSelectSector={(name) =>
+                  navigateTo("products", { sector: name })
+                }
+              />
+            </motion.div>
+          )}
+
+          {screen === "products" && (
+            <motion.div key="products" {...pageTransition}>
+              <ProductList
+                sector={selectedSector}
+                onSelectProduct={(name) =>
+                  navigateTo("compare", { product: name })
+                }
+              />
+            </motion.div>
+          )}
+
+          {screen === "compare" && (
+            <motion.div key="compare" {...pageTransition}>
+              <PriceComparison
+                sector={selectedSector}
+                product={selectedProduct}
+                onAddToCart={addToCart}
+              />
+            </motion.div>
+          )}
+
+          {screen === "cart" && (
+            <motion.div key="cart" {...pageTransition}>
+              <Cart
+                items={cart}
+                onRemoveItem={removeFromCart}
+                onClearCart={clearCart}
+                onCheckout={() => setShowCheckout(true)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {showCheckout && (
+        <CheckoutModal
+          items={cart}
+          total={cart.reduce((s, i) => s + i.price, 0)}
+          onClose={() => setShowCheckout(false)}
+          prefillName={user?.name}
+          prefillPhone={user?.phone}
+        />
+      )}
+    </div>
+  );
 }
